@@ -1,0 +1,40 @@
+---
+title: "North Carolina Early Voting"
+author: "Jon Taylor"
+date: "November 10, 2016"
+output: html_document
+---
+
+```{R, message=FALSE, warning=FALSE, image.height=800, image.width=1000}
+library(leaflet)
+library(ggmap)
+library(dplyr)
+library(knitr)
+
+
+setwd("C:/Users/tayjx017/code/R/NorthCarolinaEarlyVoting")
+locs  <- read.delim("locations.tsv", header=FALSE)
+names(locs) <- c("ElectionDate", "County", "Open", "Building", "Street", "CityStateZip", "Date", "Hours")
+
+#get rid of election date, add address, and choose only polls open on sundays
+locs <- locs[,-1]
+locs$Address  <- paste(locs$Street, locs$CityStateZip, sep=" ")
+locs <-  filter(locs, Hours != "Closed")
+sundayLocs  <- filter(locs, Date=="10/23/2016" | Date=="10/30/2016" | Date== "11/06/2016")
+
+#Stopped because I overran google's geocode query limit. Read geocoded lats from file instead.
+#sundayLatLon <- geocode(sundayLocs$Address)
+sundayLatLon <- read.csv("sundayLatLon.csv")
+sundayLocs$lon <- sundayLatLon$lon  
+sundayLocs$lat <- sundayLatLon$lat
+
+leaflet(sundayLocs) %>%
+    addTiles() %>%
+        addTiles(urlTemplate = "http://www.justicemap.org/tile/county/black/{z}/{x}/{y}.png",
+                 attribution = "JusticeMap", options=tileOptions(opacity=0.5, minZoom=0, maxZoom=18)) %>%
+                    addMarkers(data=sundayLocs, ~lon, ~lat, 
+                           popup = paste("<b>Address: </b>", sundayLocs$Address,
+                                         "<br><b>Hours: </b>", sundayLocs$Hours),
+                           clusterOptions = markerClusterOptions())
+  
+```
