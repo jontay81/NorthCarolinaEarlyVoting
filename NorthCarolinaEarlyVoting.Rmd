@@ -5,6 +5,21 @@ date: "November 10, 2016"
 output: html_document
 ---
 
+Recent news reports suggested that Republican state governments tried to limit
+early voting, especially on Sundays, because that is when African-American voters
+were most likely to vote relative to White voters. I wanted to take a look at 
+a map of early polling locations based on population demographics. I found the
+early voting location list on www.ncvoter.org and pulled demographic data from
+JusticeMap. Here is a link to a news article discussing this story. 
+
+http://www.reuters.com/article/us-usa-election-northcarolina-insight-idUSKBN12Y0ZY
+
+This work is just an initial concept and could be expanded upon with more data and analysis.
+
+Note: I ran out of geocoding queries through google maps during development,
+so I just commented that out and read the lat/lon pairs from a saved csv file of 
+the google map geocoded locations.
+
 ```{R, message=FALSE, warning=FALSE, image.height=800, image.width=1000}
 library(leaflet)
 library(ggmap)
@@ -12,7 +27,8 @@ library(dplyr)
 library(knitr)
 
 
-setwd("C:/Users/tayjx017/code/R/NorthCarolinaEarlyVoting")
+
+setwd("~/code/R/NorthCarolinaEarlyVoting")
 locs  <- read.delim("locations.tsv", header=FALSE)
 names(locs) <- c("ElectionDate", "County", "Open", "Building", "Street", "CityStateZip", "Date", "Hours")
 
@@ -36,5 +52,6 @@ leaflet(sundayLocs) %>%
                            popup = paste("<b>Address: </b>", sundayLocs$Address,
                                          "<br><b>Hours: </b>", sundayLocs$Hours),
                            clusterOptions = markerClusterOptions())
+                                
   
 ```
